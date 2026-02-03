@@ -138,8 +138,8 @@ def main():
 
     repo.git.add("velog-posts")
     repo.git.add(STATE_FILE)
-    repo.git.commit("-m", f"chore: sync velog posts ({changed} new)")
-    print(f"✅ {changed}개 새 글 저장 완료")
+    print(f"✅ {changed}개 새 글 저장 완료 (commit은 workflow에서 처리)")
+
 
 if __name__ == "__main__":
     main()
