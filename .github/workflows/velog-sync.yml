@@ -1,0 +1,45 @@
+name: Sync Velog & Update README
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 14 * * *"  # 매일 23:00 KST (UTC 14:00)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install deps
+        run: |
+          pip install feedparser gitpython requests
+
+      - name: Sync velog posts (published only)
+        run: python scripts/update_blog.py
+
+      - name: Update README series index
+        env:
+          VELOG_USERNAME: yura103
+        run: python scripts/update_readme_series.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "yura103"
+          git config user.email "yura1a2b@gmail.com"
+          git add velog-posts README.md .velog_sync_state.json .velog_series_cache.json || true
+          git commit -m "chore: sync velog + update readme" || echo "No changes"
+          git push
